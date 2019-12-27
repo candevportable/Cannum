@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:manda_msg/Home.dart';
+import 'package:manda_msg/model/User.dart';
 
 class Signin extends StatefulWidget {
   @override
@@ -18,13 +21,19 @@ class _SigninState extends State<Signin> {
 
     if (name.isNotEmpty && name.length > 2) {
       if (email.isNotEmpty && email.contains("@")) {
-        if (password.isNotEmpty && password.length >= 8) {
+        if (password.isNotEmpty && password.length >= 6) {
           setState(() {
             _errorMessage = "";
           });
+
+          User user = User();
+          user.name = name;
+          user.email = email;
+          user.password = password;
+          _registerUser(user);
         } else {
           setState(() {
-            _errorMessage = "A senha deve conter pelo menos 8 caracteres.";
+            _errorMessage = "A senha deve conter pelo menos 6 caracteres.";
           });
         }
       } else {
@@ -37,6 +46,24 @@ class _SigninState extends State<Signin> {
         _errorMessage = "Informe um nome.";
       });
     }
+  }
+
+  _registerUser(User user){
+      FirebaseAuth auth = FirebaseAuth.instance;
+      auth.createUserWithEmailAndPassword(
+          email: user.email,
+          password: user.password
+      ).then((firebaseUser){
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => Home()
+              ));
+      }).catchError((error){
+          setState(() {
+              _errorMessage = "Erro ao cadastrar usuário, verifique os campos e tente novamente.";
+          });
+      });
   }
 
   @override
