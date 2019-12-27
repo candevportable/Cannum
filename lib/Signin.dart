@@ -6,6 +6,39 @@ class Signin extends StatefulWidget {
 }
 
 class _SigninState extends State<Signin> {
+  TextEditingController _controllerName = TextEditingController();
+  TextEditingController _controllerEmail = TextEditingController();
+  TextEditingController _controllerPassword = TextEditingController();
+  String _errorMessage = "";
+
+  _validateFields() {
+    String name = _controllerName.text;
+    String email = _controllerEmail.text;
+    String password = _controllerPassword.text;
+
+    if (name.isNotEmpty && name.length > 2) {
+      if (email.isNotEmpty && email.contains("@")) {
+        if (password.isNotEmpty && password.length >= 8) {
+          setState(() {
+            _errorMessage = "";
+          });
+        } else {
+          setState(() {
+            _errorMessage = "A senha deve conter pelo menos 8 caracteres.";
+          });
+        }
+      } else {
+        setState(() {
+          _errorMessage = "O e-mail informado é inválido.";
+        });
+      }
+    } else {
+      setState(() {
+        _errorMessage = "Informe um nome.";
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,6 +64,7 @@ class _SigninState extends State<Signin> {
                 Padding(
                   padding: EdgeInsets.only(bottom: 8),
                   child: TextField(
+                    controller: _controllerName,
                     autofocus: true,
                     keyboardType: TextInputType.text,
                     style: TextStyle(fontSize: 20),
@@ -46,6 +80,7 @@ class _SigninState extends State<Signin> {
                 Padding(
                   padding: EdgeInsets.only(bottom: 8),
                   child: TextField(
+                    controller: _controllerEmail,
                     keyboardType: TextInputType.emailAddress,
                     style: TextStyle(fontSize: 20),
                     decoration: InputDecoration(
@@ -58,6 +93,8 @@ class _SigninState extends State<Signin> {
                   ),
                 ),
                 TextField(
+                  controller: _controllerPassword,
+                  obscureText: true,
                   keyboardType: TextInputType.text,
                   style: TextStyle(fontSize: 20),
                   decoration: InputDecoration(
@@ -79,9 +116,17 @@ class _SigninState extends State<Signin> {
                     padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(32)),
-                    onPressed: () {},
+                    onPressed: () {
+                      _validateFields();
+                    },
                   ),
                 ),
+                Center(
+                  child: Text(
+                    _errorMessage,
+                    style: TextStyle(color: Colors.red, fontSize: 20),
+                  ),
+                )
               ],
             ),
           ),
