@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:manda_msg/Signin.dart';
 
-class Login extends StatefulWidget {
+class Signin extends StatefulWidget {
   @override
-  _LoginState createState() => _LoginState();
+  _SigninState createState() => _SigninState();
 }
 
-class _LoginState extends State<Login> {
+class _SigninState extends State<Signin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Cadastro"),
+      ),
       body: Container(
         decoration: BoxDecoration(color: Color(0xff075E54)),
         padding: EdgeInsets.all(16),
@@ -21,7 +23,7 @@ class _LoginState extends State<Login> {
                 Padding(
                   padding: EdgeInsets.only(bottom: 32),
                   child: Image.asset(
-                    "images/logo.png",
+                    "images/usuario.png",
                     width: 200,
                     height: 150,
                   ),
@@ -30,6 +32,20 @@ class _LoginState extends State<Login> {
                   padding: EdgeInsets.only(bottom: 8),
                   child: TextField(
                     autofocus: true,
+                    keyboardType: TextInputType.text,
+                    style: TextStyle(fontSize: 20),
+                    decoration: InputDecoration(
+                        contentPadding: EdgeInsets.fromLTRB(32, 16, 32, 16),
+                        hintText: "Nome",
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(32))),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(bottom: 8),
+                  child: TextField(
                     keyboardType: TextInputType.emailAddress,
                     style: TextStyle(fontSize: 20),
                     decoration: InputDecoration(
@@ -56,7 +72,7 @@ class _LoginState extends State<Login> {
                   padding: EdgeInsets.only(top: 16, bottom: 10),
                   child: RaisedButton(
                     child: Text(
-                      "Entrar",
+                      "Cadastrar",
                       style: TextStyle(color: Colors.white, fontSize: 20),
                     ),
                     color: Colors.green,
@@ -66,24 +82,6 @@ class _LoginState extends State<Login> {
                     onPressed: () {},
                   ),
                 ),
-                  Center(
-                      child: GestureDetector(
-                          child: Text(
-                              "Não tem uma conta? Cadastre-se!",
-                              style: TextStyle(
-                                  color: Colors.white
-                              ),
-                          ),
-                          onTap: (){
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Signin()
-                                )
-                            );
-                          },
-                      ),
-                  )
               ],
             ),
           ),
