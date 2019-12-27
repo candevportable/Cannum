@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:manda_msg/Home.dart';
 import 'package:manda_msg/model/User.dart';
 
@@ -48,22 +49,25 @@ class _SigninState extends State<Signin> {
     }
   }
 
-  _registerUser(User user){
-      FirebaseAuth auth = FirebaseAuth.instance;
-      auth.createUserWithEmailAndPassword(
-          email: user.email,
-          password: user.password
-      ).then((firebaseUser){
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => Home()
-              ));
-      }).catchError((error){
-          setState(() {
-              _errorMessage = "Erro ao cadastrar usuário, verifique os campos e tente novamente.";
-          });
+  _registerUser(User user) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    auth.createUserWithEmailAndPassword(
+        email: user.email,
+        password: user.password
+    ).then((firebaseUser) {
+      Firestore db = Firestore.instance;
+
+      db.collection("users")
+          .document(firebaseUser.user.uid)
+          .setData(user.toMap());
+
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
+    }).catchError((error) {
+      setState(() {
+        _errorMessage =
+            "Erro ao cadastrar usuário, verifique os campos e tente novamente.";
       });
+    });
   }
 
   @override
