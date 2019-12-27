@@ -1,5 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:manda_msg/Signin.dart';
+
+import 'Home.dart';
+import 'model/User.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -7,6 +11,64 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  TextEditingController _controllerEmail = TextEditingController();
+  TextEditingController _controllerPassword = TextEditingController();
+  String _errorMessage = "";
+
+  _validateFields() {
+    String email = _controllerEmail.text;
+    String password = _controllerPassword.text;
+
+    if (email.isNotEmpty && email.contains("@")) {
+      if (password.isNotEmpty) {
+        setState(() {
+          _errorMessage = "";
+        });
+
+        User user = User();
+        user.email = email;
+        user.password = password;
+        _logUser(user);
+      } else {
+        setState(() {
+          _errorMessage = "Preencha a senha.";
+        });
+      }
+    } else {
+      setState(() {
+        _errorMessage = "O e-mail informado é inválido.";
+      });
+    }
+  }
+
+  _logUser(User user) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    auth
+        .signInWithEmailAndPassword(email: user.email, password: user.password)
+        .then((firebaseUser) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Home()));
+    }).catchError((error) {
+      setState(() {
+        _errorMessage =
+            "Erro ao autenticar usuário, verifique os campos e tente novamente.";
+      });
+    });
+  }
+
+  Future _verifyUserLogged() async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    FirebaseUser user = await auth.currentUser();
+    if (user != null) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Home()));
+    }
+  }
+
+  @override
+  void initState() {
+    _verifyUserLogged();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,6 +91,7 @@ class _LoginState extends State<Login> {
                 Padding(
                   padding: EdgeInsets.only(bottom: 8),
                   child: TextField(
+                    controller: _controllerEmail,
                     autofocus: true,
                     keyboardType: TextInputType.emailAddress,
                     style: TextStyle(fontSize: 20),
@@ -42,6 +105,8 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 TextField(
+                  controller: _controllerPassword,
+                  obscureText: true,
                   keyboardType: TextInputType.text,
                   style: TextStyle(fontSize: 20),
                   decoration: InputDecoration(
@@ -63,27 +128,32 @@ class _LoginState extends State<Login> {
                     padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(32)),
-                    onPressed: () {},
+                    onPressed: () {
+                      _validateFields();
+                    },
                   ),
                 ),
-                  Center(
-                      child: GestureDetector(
-                          child: Text(
-                              "Não tem uma conta? Cadastre-se!",
-                              style: TextStyle(
-                                  color: Colors.white
-                              ),
-                          ),
-                          onTap: (){
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Signin()
-                                )
-                            );
-                          },
-                      ),
-                  )
+                Center(
+                  child: GestureDetector(
+                    child: Text(
+                      "Não tem uma conta? Cadastre-se!",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => Signin()));
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 16),
+                  child: Center(
+                    child: Text(
+                      _errorMessage,
+                      style: TextStyle(color: Colors.red, fontSize: 20),
+                    ),
+                  ),
+                )
               ],
             ),
           ),
