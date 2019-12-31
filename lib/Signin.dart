@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:manda_msg/Home.dart';
+import 'package:manda_msg/RouteGenerator.dart';
 import 'package:manda_msg/model/User.dart';
 
 class Signin extends StatefulWidget {
@@ -61,11 +61,12 @@ class _SigninState extends State<Signin> {
           .document(firebaseUser.user.uid)
           .setData(user.toMap());
 
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
+      Navigator.pushNamedAndRemoveUntil(context, RouteGenerator.HOME_ROUTE, (_)=>false);
     }).catchError((error) {
       setState(() {
         _errorMessage =
             "Erro ao cadastrar usuário, verifique os campos e tente novamente.";
+        print(error.toString());
       });
     });
   }

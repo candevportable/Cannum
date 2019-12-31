@@ -1,9 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:manda_msg/RouteGenerator.dart';
 import 'package:manda_msg/screens/TabContacts.dart';
 import 'package:manda_msg/screens/TabConversations.dart';
-
-import 'Login.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -41,8 +40,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
     FirebaseAuth auth = FirebaseAuth.instance;
     await auth.signOut();
 
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => Login()));
+    Navigator.pushReplacementNamed(context, RouteGenerator.LOGIN_ROUTE);
   }
 
   @override
