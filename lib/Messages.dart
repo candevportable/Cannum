@@ -28,16 +28,18 @@ class _MessagesState extends State<Messages> {
       message.message = textMessage;
       message.urlImage = "";
       message.type = "text";
+      message.time = DateTime.now();
 
       _saveMessage(_userIdRecipient, _userId, message);
+      _saveMessage(_userId, _userIdRecipient, message);
     }
   }
 
   _saveMessage(String recipientId, String senderId, Message message) async {
     await _db
         .collection("messages")
-        .document(_userId)
-        .collection(_userIdRecipient)
+        .document(recipientId)
+        .collection(senderId)
         .add(message.toMap());
 
     _controllerMessage.clear();
@@ -105,6 +107,7 @@ class _MessagesState extends State<Messages> {
           .collection("messages")
           .document(_userId)
           .collection(_userIdRecipient)
+          .orderBy("time", descending: false)
           .snapshots(),
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
