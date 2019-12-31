@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:manda_msg/RouteGenerator.dart';
 import 'package:manda_msg/model/User.dart';
 
 class TabContacts extends StatefulWidget {
@@ -58,7 +59,10 @@ class _TabContactsState extends State<TabContacts> {
             return Center(
               child: Column(
                 children: <Widget>[
-                  Text("Carregando contatos"),
+                  Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text("Carregando contatos"),
+                  ),
                   CircularProgressIndicator()
                 ],
               ),
@@ -73,6 +77,12 @@ class _TabContactsState extends State<TabContacts> {
                   User user = contactsList[index];
 
                   return ListTile(
+                      onTap: (){
+                        Navigator.pushNamed(
+                            context,
+                            RouteGenerator.MESSAGES_ROUTE,
+                            arguments: user);
+                      },
                       contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
                       leading: CircleAvatar(
                         maxRadius: 30,
