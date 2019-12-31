@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:manda_msg/model/Conversation.dart';
+import 'package:manda_msg/model/User.dart';
 
 class TabContacts extends StatefulWidget {
   @override
@@ -8,43 +10,87 @@ class TabContacts extends StatefulWidget {
 
 class _TabContactsState extends State<TabContacts> {
 
-  List<Conversation> ConversationList = [
-    Conversation("Ana Clara", "Olá, tudo bem?",
-        "https://firebasestorage.googleapis.com/v0/b/fir-flutter-3ccb0.appspot.com/o/profile%2Fperfil1.jpg?alt=media&token=0c287b3c-85cf-426d-bcc2-99f5d65cff3f"),
-    Conversation("Pedro Silva", "Me manda o nome daquela série",
-        "https://firebasestorage.googleapis.com/v0/b/fir-flutter-3ccb0.appspot.com/o/profile%2Fperfil2.jpg?alt=media&token=ff005287-a309-4888-8038-612695f46c1e"),
-    Conversation("Marcela Almeida", "Vamos sair hoje?",
-        "https://firebasestorage.googleapis.com/v0/b/fir-flutter-3ccb0.appspot.com/o/profile%2Fperfil3.jpg?alt=media&token=187c4d06-1a64-4d9d-af9c-e0746973f6bd"),
-    Conversation(
-        "José Renato",
-        "Não vai acreditar no que tenho para te contar...",
-        "https://firebasestorage.googleapis.com/v0/b/fir-flutter-3ccb0.appspot.com/o/profile%2Fperfil4.jpg?alt=media&token=01978adc-6293-449e-b308-225bca45a886"),
-    Conversation("Jamilton Damasceno", "Curso novo!!! dps dá uma olhada!!",
-        "https://firebasestorage.googleapis.com/v0/b/fir-flutter-3ccb0.appspot.com/o/profile%2Fperfil5.jpg?alt=media&token=e2b1dafa-9e0d-45d2-bad4-1808f629b32f"),
-  ];
+  //String _userId;
+  String _userEmail;
+
+  Future<List<User>> _loadContacts() async {
+    Firestore db = Firestore.instance;
+
+    QuerySnapshot querySnapshot = await db.collection("users").getDocuments();
+
+    List<User> usersList = List();
+    for (DocumentSnapshot item in querySnapshot.documents) {
+      var data = item.data;
+
+      if(data["email"] == _userEmail) continue;
+
+      User user = User();
+      user.name = data["name"];
+      user.email = data["email"];
+      user.urlImage = data["urlImage"];
+
+      usersList.add(user);
+    }
+    return usersList;
+  }
+
+  _recoverProfileData() async{
+    FirebaseAuth auth = FirebaseAuth.instance;
+    FirebaseUser user = await auth.currentUser();
+    //_userId = user.uid;
+    _userEmail = user.email;
+  }
+
+  @override
+  void initState() {
+    _recoverProfileData();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-        itemCount: ConversationList.length,
-        itemBuilder: (context, index) {
-          Conversation conversation = ConversationList[index];
-
-          return ListTile(
-            contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-            leading: CircleAvatar(
-              maxRadius: 30,
-              backgroundColor: Colors.grey,
-              backgroundImage: NetworkImage(conversation.pathPhoto),
-            ),
-            title: Text(
-              conversation.name,
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16
+    return FutureBuilder<List<User>>(
+      future: _loadContacts(),
+      builder: (context, snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+          case ConnectionState.waiting:
+            return Center(
+              child: Column(
+                children: <Widget>[
+                  Text("Carregando contatos"),
+                  CircularProgressIndicator()
+                ],
               ),
-            )
-          );
-        });
+            );
+            break;
+          case ConnectionState.active:
+          case ConnectionState.done:
+            return ListView.builder(
+                itemCount: snapshot.data.length,
+                itemBuilder: (_, index) {
+                  List<User> contactsList = snapshot.data;
+                  User user = contactsList[index];
+
+                  return ListTile(
+                      contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+                      leading: CircleAvatar(
+                        maxRadius: 30,
+                        backgroundColor: Colors.grey,
+                        backgroundImage: user.urlImage != null
+                            ? NetworkImage(user.urlImage)
+                            : null,
+                      ),
+                      title: Text(
+                        user.name,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
+                      ));
+                });
+            break;
+        }
+        return null;
+      },
+    );
   }
 }

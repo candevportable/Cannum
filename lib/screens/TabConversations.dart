@@ -7,7 +7,7 @@ class TabConversations extends StatefulWidget {
 }
 
 class _TabConversationsState extends State<TabConversations> {
-  List<Conversation> ConversationList = [
+  List<Conversation> conversationList = [
     Conversation("Ana Clara", "Olá, tudo bem?",
         "https://firebasestorage.googleapis.com/v0/b/fir-flutter-3ccb0.appspot.com/o/profile%2Fperfil1.jpg?alt=media&token=0c287b3c-85cf-426d-bcc2-99f5d65cff3f"),
     Conversation("Pedro Silva", "Me manda o nome daquela série",
@@ -24,9 +24,9 @@ class _TabConversationsState extends State<TabConversations> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-        itemCount: ConversationList.length,
+        itemCount: conversationList.length,
         itemBuilder: (context, index) {
-          Conversation conversation = ConversationList[index];
+          Conversation conversation = conversationList[index];
 
           return ListTile(
             contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),

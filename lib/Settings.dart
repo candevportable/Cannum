@@ -14,8 +14,8 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   TextEditingController _controllerName = TextEditingController();
   File _photo;
-  String _idUser;
-  String _urlImage;
+  String _userId;
+  String _imageUrl;
   bool _uploading = false;
   bool _loading = false;
 
@@ -46,7 +46,7 @@ class _SettingsState extends State<Settings> {
     FirebaseStorage storage = FirebaseStorage.instance;
     StorageReference root = storage.ref();
     StorageReference file = root.child("profile")
-                                .child(_idUser + ".jpg");
+                                .child(_userId + ".jpg");
 
     StorageUploadTask task = file.putFile(_photo);
     task.events.listen((StorageTaskEvent storageEvent){
@@ -71,7 +71,7 @@ class _SettingsState extends State<Settings> {
     _reloadUrlImageFirestore(url);
 
     setState(() {
-      _urlImage = url;
+      _imageUrl = url;
     });
   }
 
@@ -83,7 +83,7 @@ class _SettingsState extends State<Settings> {
     };
 
     db.collection("users")
-    .document(_idUser)
+    .document(_userId)
     .updateData(updatedData);
   }
 
@@ -96,7 +96,7 @@ class _SettingsState extends State<Settings> {
     };
 
     db.collection("users")
-        .document(_idUser)
+        .document(_userId)
         .updateData(updatedData);
   }
 
@@ -104,11 +104,11 @@ class _SettingsState extends State<Settings> {
     _loading = true;
     FirebaseAuth auth = FirebaseAuth.instance;
     FirebaseUser user = await auth.currentUser();
-    _idUser = user.uid;
+    _userId = user.uid;
 
     Firestore db = Firestore.instance;
     DocumentSnapshot snapshot = await db.collection("users")
-     .document(_idUser)
+     .document(_userId)
      .get();
 
     Map<String, dynamic> data = snapshot.data;
@@ -120,10 +120,9 @@ class _SettingsState extends State<Settings> {
 
     if(data["urlImage"] != null){
       setState(() {
-        _urlImage = data["urlImage"];
+        _imageUrl = data["urlImage"];
       });
     }
-
   }
 
   @override
@@ -154,8 +153,8 @@ class _SettingsState extends State<Settings> {
                   radius: 100,
                   backgroundColor: Colors.grey,
                   backgroundImage:
-                  _urlImage != null
-                      ? NetworkImage(_urlImage)
+                  _imageUrl != null
+                      ? NetworkImage(_imageUrl)
                       : null,
                 ),
                 Row(
