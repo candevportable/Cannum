@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:manda_msg/Home.dart';
 import 'package:manda_msg/Login.dart';
+import 'package:manda_msg/Settings.dart';
 import 'package:manda_msg/Signin.dart';
 
 class RouteGenerator{
@@ -8,6 +9,7 @@ class RouteGenerator{
   static const String LOGIN_ROUTE = "/login";
   static const String SIGNIN_ROUTE = "/signin";
   static const String HOME_ROUTE = "/home";
+  static const String SETTINGS_ROUTE = "/settings";
 
   static Route<dynamic> generateRoute(RouteSettings settings){
     switch(settings.name){
@@ -27,9 +29,14 @@ class RouteGenerator{
         return MaterialPageRoute(
             builder: (_) => Home()
         );
+      case SETTINGS_ROUTE:
+        return MaterialPageRoute(
+            builder: (_) => Settings()
+        );
       default:
         _routeError();
     }
+    return null;
   }
 
   static Route<dynamic> _routeError(){
