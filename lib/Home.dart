@@ -16,9 +16,18 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
     "Configurações", "Deslogar"
   ];
 
+  Future _verifyUserLogged() async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    FirebaseUser user = await auth.currentUser();
+    if (user == null) {
+      Navigator.pushReplacementNamed(context, RouteGenerator.LOGIN_ROUTE);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _verifyUserLogged();
     _tabController = TabController(
       length: 2,
       vsync: this

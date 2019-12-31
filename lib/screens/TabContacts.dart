@@ -10,8 +10,6 @@ class TabContacts extends StatefulWidget {
 }
 
 class _TabContactsState extends State<TabContacts> {
-
-  //String _userId;
   String _userEmail;
 
   Future<List<User>> _loadContacts() async {
@@ -26,6 +24,7 @@ class _TabContactsState extends State<TabContacts> {
       if(data["email"] == _userEmail) continue;
 
       User user = User();
+      user.userId = item.documentID;
       user.name = data["name"];
       user.email = data["email"];
       user.urlImage = data["urlImage"];
@@ -38,7 +37,6 @@ class _TabContactsState extends State<TabContacts> {
   _recoverProfileData() async{
     FirebaseAuth auth = FirebaseAuth.instance;
     FirebaseUser user = await auth.currentUser();
-    //_userId = user.uid;
     _userEmail = user.email;
   }
 

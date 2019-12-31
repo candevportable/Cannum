@@ -1,5 +1,6 @@
 class User {
   String _name;
+  String _userId;
   String _email;
   String _password;
   String _urlImage;
@@ -14,6 +15,12 @@ class User {
       return map;
   }
 
+
+  String get userId => _userId;
+
+  set userId(String value) {
+    _userId = value;
+  }
 
   String get urlImage => _urlImage;
 
