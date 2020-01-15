@@ -6,7 +6,7 @@ class Conversation {
     String _recipientId;
     String _name;
     String _message;
-    String _pathPhoto;
+    String _urlImage;
     String _type;
 
 
@@ -27,7 +27,7 @@ class Conversation {
             "recipientId": this.recipientId,
             "name": this.name,
             "message": this.message,
-            "pathPhoto": this.pathPhoto,
+            "urlImage": this.urlImage,
             "type": this.type,
         };
         return map;
@@ -47,10 +47,10 @@ class Conversation {
 
     String get message => _message;
 
-    String get pathPhoto => _pathPhoto;
+    String get urlImage => _urlImage;
 
-    set pathPhoto(String value) {
-        _pathPhoto = value;
+    set urlImage(String value) {
+        _urlImage = value;
     }
 
     set message(String value) {

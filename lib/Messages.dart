@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:manda_msg/model/Conversation.dart';
@@ -47,7 +48,7 @@ class _MessagesState extends State<Messages> {
     conversationSender.recipientId = _userIdRecipient;
     conversationSender.message = msg.message;
     conversationSender.name = widget.contact.name;
-    conversationSender.pathPhoto = widget.contact.urlImage;
+    conversationSender.urlImage = widget.contact.urlImage;
     conversationSender.type = msg.type;
     conversationSender.save();
 
@@ -56,7 +57,7 @@ class _MessagesState extends State<Messages> {
     conversationRecipient.recipientId = _userId;
     conversationRecipient.message = msg.message;
     conversationRecipient.name = widget.contact.name;
-    conversationRecipient.pathPhoto = widget.contact.urlImage;
+    conversationRecipient.urlImage = widget.contact.urlImage;
     conversationRecipient.type = msg.type;
     conversationRecipient.save();
   }
@@ -156,15 +157,20 @@ class _MessagesState extends State<Messages> {
               ),
             ),
           ),
-          FloatingActionButton(
-            backgroundColor: Color(0xff075E54),
-            child: Icon(
-              Icons.send,
-              color: Colors.white,
-            ),
-            mini: true,
-            onPressed: _sendMessage,
-          )
+          Platform.isIOS
+            ? CupertinoButton(
+                child: Text("Enviar"),
+                onPressed: _sendMessage,
+              )
+            : FloatingActionButton(
+                backgroundColor: Color(0xff075E54),
+                child: Icon(
+                  Icons.send,
+                  color: Colors.white,
+                ),
+                mini: true,
+                onPressed: _sendMessage,
+              )
         ],
       ),
     );
