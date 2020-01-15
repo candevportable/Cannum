@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -24,6 +26,8 @@ class _MessagesState extends State<Messages> {
   Firestore _db = Firestore.instance;
   bool _uploading = false;
   TextEditingController _controllerMessage = TextEditingController();
+  final _controller = StreamController<QuerySnapshot>.broadcast();
+  ScrollController _scrollController = ScrollController();
 
   _sendMessage() {
     String textMessage = _controllerMessage.text;
@@ -116,16 +120,34 @@ class _MessagesState extends State<Messages> {
     _saveMessage(_userId, _userIdRecipient, message);
   }
 
-  _recoverProfileData() async {
+  _loadInitialData() async {
     FirebaseAuth auth = FirebaseAuth.instance;
     FirebaseUser user = await auth.currentUser();
     _userId = user.uid;
     _userIdRecipient = widget.contact.userId;
+
+    _addMessagesListener();
+  }
+
+  Stream<QuerySnapshot> _addMessagesListener() {
+    final stream = _db
+        .collection("messages")
+        .document(_userId)
+        .collection(_userIdRecipient)
+        .orderBy("time", descending: false)
+        .snapshots();
+
+    stream.listen((data) {
+      _controller.add(data);
+      Timer(Duration(seconds: 1), (){
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      });
+    });
   }
 
   @override
   void initState() {
-    _recoverProfileData();
+    _loadInitialData();
     super.initState();
   }
 
@@ -176,12 +198,7 @@ class _MessagesState extends State<Messages> {
     );
 
     var stream = StreamBuilder(
-      stream: _db
-          .collection("messages")
-          .document(_userId)
-          .collection(_userIdRecipient)
-          .orderBy("time", descending: false)
-          .snapshots(),
+      stream: _controller.stream,
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.none:
@@ -208,6 +225,7 @@ class _MessagesState extends State<Messages> {
             } else {
               return Expanded(
                 child: ListView.builder(
+                    controller: _scrollController,
                     itemCount: querySnapshot.documents.length,
                     itemBuilder: (context, index) {
                       List<DocumentSnapshot> messages = querySnapshot.documents.toList();
