@@ -41,8 +41,6 @@ class _SettingsState extends State<Settings> {
   }
 
   Future _uploadImage() async{
-
-
     FirebaseStorage storage = FirebaseStorage.instance;
     StorageReference root = storage.ref();
     StorageReference file = root.child("profile")

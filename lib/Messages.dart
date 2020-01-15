@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:manda_msg/model/Conversation.dart';
 import 'package:manda_msg/model/User.dart';
-
 import 'model/Message.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
 
 class Messages extends StatefulWidget {
   User contact;
@@ -18,6 +21,7 @@ class _MessagesState extends State<Messages> {
   String _userId;
   String _userIdRecipient;
   Firestore _db = Firestore.instance;
+  bool _uploading = false;
   TextEditingController _controllerMessage = TextEditingController();
 
   _sendMessage() {
@@ -32,7 +36,27 @@ class _MessagesState extends State<Messages> {
 
       _saveMessage(_userIdRecipient, _userId, message);
       _saveMessage(_userId, _userIdRecipient, message);
+
+      _saveConversation(message);
     }
+  }
+
+  _saveConversation(Message msg){
+    Conversation conversationSender = Conversation();
+    conversationSender.userId = _userId;
+    conversationSender.recipientId = _userIdRecipient;
+    conversationSender.message = msg.message;
+    conversationSender.name = widget.contact.name;
+    conversationSender.pathPhoto = widget.contact.urlImage;
+    conversationSender.type = msg.type;
+
+    Conversation conversationRecipient = Conversation();
+    conversationRecipient.userId = _userIdRecipient;
+    conversationRecipient.recipientId = _userId;
+    conversationRecipient.message = msg.message;
+    conversationRecipient.name = widget.contact.name;
+    conversationRecipient.pathPhoto = widget.contact.urlImage;
+    conversationRecipient.type = msg.type;
   }
 
   _saveMessage(String recipientId, String senderId, Message message) async {
@@ -45,7 +69,49 @@ class _MessagesState extends State<Messages> {
     _controllerMessage.clear();
   }
 
-  _sendImage() {}
+  _sendImage() async{
+    File _selectedImage = await ImagePicker.pickImage(source: ImageSource.camera);
+    _uploading = true;
+    String _imageName = DateTime.now().millisecondsSinceEpoch.toString();
+
+    FirebaseStorage storage = FirebaseStorage.instance;
+    StorageReference root = storage.ref();
+    StorageReference file = root.child("messages")
+        .child(_userId)
+        .child(_imageName + ".jpg");
+
+    StorageUploadTask task = file.putFile(_selectedImage);
+    task.events.listen((StorageTaskEvent storageEvent){
+      if(storageEvent.type == StorageTaskEventType.progress){
+        setState(() {
+          _uploading = true;
+        });
+      }else if(storageEvent.type == StorageTaskEventType.success){
+        setState(() {
+          _uploading = false;
+        });
+      }
+    });
+
+    task.onComplete.then((StorageTaskSnapshot snapshot){
+      _fetchUrlImage(snapshot);
+    });
+
+  }
+
+  Future _fetchUrlImage(StorageTaskSnapshot snapshot) async{
+    String url = await snapshot.ref.getDownloadURL();
+
+    Message message = Message();
+    message.userId = _userId;
+    message.message = "";
+    message.urlImage = url;
+    message.type = "image";
+    message.time = DateTime.now();
+
+    _saveMessage(_userIdRecipient, _userId, message);
+    _saveMessage(_userId, _userIdRecipient, message);
+  }
 
   _recoverProfileData() async {
     FirebaseAuth auth = FirebaseAuth.instance;
@@ -81,10 +147,9 @@ class _MessagesState extends State<Messages> {
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(32)),
-                  prefixIcon: IconButton(
-                    icon: Icon(Icons.camera_alt),
-                    onPressed: _sendImage,
-                  ),
+                  prefixIcon:
+                  _uploading ? CircularProgressIndicator()
+                    :IconButton(icon: Icon(Icons.camera_alt),onPressed: _sendImage,),
                 ),
               ),
             ),
@@ -156,10 +221,10 @@ class _MessagesState extends State<Messages> {
                                 color: color,
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(8))),
-                            child: Text(
-                              item["message"],
-                              style: TextStyle(fontSize: 18),
-                            ),
+                            child:
+                            item["type"] == "text"
+                              ? Text(item["message"], style: TextStyle(fontSize: 18),)
+                              : Image.network(item["urlImage"]),
                           ),
                         ),
                       );
@@ -168,6 +233,7 @@ class _MessagesState extends State<Messages> {
             }
             break;
         }
+        return null;
       },
     );
 
