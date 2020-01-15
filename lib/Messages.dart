@@ -49,6 +49,7 @@ class _MessagesState extends State<Messages> {
     conversationSender.name = widget.contact.name;
     conversationSender.pathPhoto = widget.contact.urlImage;
     conversationSender.type = msg.type;
+    conversationSender.save();
 
     Conversation conversationRecipient = Conversation();
     conversationRecipient.userId = _userIdRecipient;
@@ -57,6 +58,7 @@ class _MessagesState extends State<Messages> {
     conversationRecipient.name = widget.contact.name;
     conversationRecipient.pathPhoto = widget.contact.urlImage;
     conversationRecipient.type = msg.type;
+    conversationRecipient.save();
   }
 
   _saveMessage(String recipientId, String senderId, Message message) async {

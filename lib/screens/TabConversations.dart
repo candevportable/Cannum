@@ -7,26 +7,24 @@ class TabConversations extends StatefulWidget {
 }
 
 class _TabConversationsState extends State<TabConversations> {
-  List<Conversation> conversationList = [
-    Conversation("Ana Clara", "Olá, tudo bem?",
-        "https://firebasestorage.googleapis.com/v0/b/fir-flutter-3ccb0.appspot.com/o/profile%2Fperfil1.jpg?alt=media&token=0c287b3c-85cf-426d-bcc2-99f5d65cff3f"),
-    Conversation("Pedro Silva", "Me manda o nome daquela série",
-        "https://firebasestorage.googleapis.com/v0/b/fir-flutter-3ccb0.appspot.com/o/profile%2Fperfil2.jpg?alt=media&token=ff005287-a309-4888-8038-612695f46c1e"),
-    Conversation("Marcela Almeida", "Vamos sair hoje?",
-        "https://firebasestorage.googleapis.com/v0/b/fir-flutter-3ccb0.appspot.com/o/profile%2Fperfil3.jpg?alt=media&token=187c4d06-1a64-4d9d-af9c-e0746973f6bd"),
-    Conversation(
-        "José Renato",
-        "Não vai acreditar no que tenho para te contar...",
-        "https://firebasestorage.googleapis.com/v0/b/fir-flutter-3ccb0.appspot.com/o/profile%2Fperfil4.jpg?alt=media&token=01978adc-6293-449e-b308-225bca45a886"),
-    Conversation("Jamilton Damasceno", "Curso novo!!! dps dá uma olhada!!",
-        "https://firebasestorage.googleapis.com/v0/b/fir-flutter-3ccb0.appspot.com/o/profile%2Fperfil5.jpg?alt=media&token=e2b1dafa-9e0d-45d2-bad4-1808f629b32f"),
-  ];
+  List<Conversation> _conversationList = List();
+
+  @override
+  void initState() {
+    super.initState();
+    Conversation conversation = Conversation();
+    conversation.name = "Ana Clara";
+    conversation.message = "Oiee";
+    conversation.pathPhoto = "https://firebasestorage.googleapis.com/v0/b/fir-flutter-3ccb0.appspot.com/o/profile%2Ffa4lgyvjmnUrbzFhhMwlOX38GYK2.jpg?alt=media&token=a8da5dad-51de-49fd-906d-c3feab823964";
+    _conversationList.add(conversation);
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-        itemCount: conversationList.length,
+        itemCount: _conversationList.length,
         itemBuilder: (context, index) {
-          Conversation conversation = conversationList[index];
+          Conversation conversation = _conversationList[index];
 
           return ListTile(
             contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),
