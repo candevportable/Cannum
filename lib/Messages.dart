@@ -173,7 +173,6 @@ class _MessagesState extends State<Messages> {
               padding: EdgeInsets.only(right: 8),
               child: TextField(
                 controller: _controllerMessage,
-                autofocus: true,
                 keyboardType: TextInputType.text,
                 style: TextStyle(fontSize: 20),
                 decoration: InputDecoration(
@@ -196,7 +195,7 @@ class _MessagesState extends State<Messages> {
                 onPressed: _sendMessage,
               )
             : FloatingActionButton(
-                backgroundColor: Color(0xff075E54),
+                backgroundColor: Color(0xff020659),
                 child: Icon(
                   Icons.send,
                   color: Colors.white,
@@ -242,7 +241,7 @@ class _MessagesState extends State<Messages> {
                       List<DocumentSnapshot> messages = querySnapshot.documents.toList();
                       DocumentSnapshot item = messages[index];
                       Alignment alignment = Alignment.centerRight;
-                      Color color = Color(0xffd2ffa5);
+                      Color color = Color(0xff525AFF);
                       if (_userId != item["userId"]) {
                         alignment = Alignment.centerLeft;
                         color = Colors.white;

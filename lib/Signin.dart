@@ -78,7 +78,7 @@ class _SigninState extends State<Signin> {
         title: Text("Cadastro"),
       ),
       body: Container(
-        decoration: BoxDecoration(color: Color(0xff075E54)),
+        decoration: BoxDecoration(color: Color(0xff020659)),
         padding: EdgeInsets.all(16),
         child: Center(
           child: SingleChildScrollView(
@@ -97,7 +97,6 @@ class _SigninState extends State<Signin> {
                   padding: EdgeInsets.only(bottom: 8),
                   child: TextField(
                     controller: _controllerName,
-                    autofocus: true,
                     keyboardType: TextInputType.text,
                     style: TextStyle(fontSize: 20),
                     decoration: InputDecoration(
@@ -144,7 +143,7 @@ class _SigninState extends State<Signin> {
                       "Cadastrar",
                       style: TextStyle(color: Colors.white, fontSize: 20),
                     ),
-                    color: Colors.green,
+                    color: Color(0xff525AFF),
                     padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(32)),
