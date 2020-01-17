@@ -51,6 +51,7 @@ flutter:
   #  - images/a_dot_ham.jpeg
   assets:
     - images/logo.png
+    - images/logoCandev.png
     - images/usuario.png
     - images/bg.png
 

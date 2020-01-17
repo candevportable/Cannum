@@ -22,6 +22,8 @@ class Messages extends StatefulWidget {
 
 class _MessagesState extends State<Messages> {
   String _userId;
+  String _userName;
+  String _userImage;
   String _userIdRecipient;
   Firestore _db = Firestore.instance;
   bool _uploading = false;
@@ -60,8 +62,8 @@ class _MessagesState extends State<Messages> {
     conversationRecipient.userId = _userIdRecipient;
     conversationRecipient.recipientId = _userId;
     conversationRecipient.message = msg.message;
-    conversationRecipient.name = widget.contact.name;
-    conversationRecipient.urlImage = widget.contact.urlImage;
+    conversationRecipient.name = _userName;
+    conversationRecipient.urlImage = _userImage;
     conversationRecipient.type = msg.type;
     conversationRecipient.save();
   }
@@ -120,12 +122,21 @@ class _MessagesState extends State<Messages> {
     _saveMessage(_userId, _userIdRecipient, message);
   }
 
+  _loadUserData() async{
+    DocumentSnapshot snapshot = await _db.collection("users")
+        .document(_userId)
+        .get();
+    Map<String, dynamic> data = snapshot.data;
+    _userName = data["name"];
+    _userImage = data["urlImage"];
+  }
+
   _loadInitialData() async {
     FirebaseAuth auth = FirebaseAuth.instance;
     FirebaseUser user = await auth.currentUser();
     _userId = user.uid;
     _userIdRecipient = widget.contact.userId;
-
+    _loadUserData();
     _addMessagesListener();
   }
 
@@ -162,7 +173,6 @@ class _MessagesState extends State<Messages> {
               padding: EdgeInsets.only(right: 8),
               child: TextField(
                 controller: _controllerMessage,
-                autofocus: true,
                 keyboardType: TextInputType.text,
                 style: TextStyle(fontSize: 20),
                 decoration: InputDecoration(
@@ -185,7 +195,7 @@ class _MessagesState extends State<Messages> {
                 onPressed: _sendMessage,
               )
             : FloatingActionButton(
-                backgroundColor: Color(0xff075E54),
+                backgroundColor: Color(0xff020659),
                 child: Icon(
                   Icons.send,
                   color: Colors.white,
@@ -231,7 +241,7 @@ class _MessagesState extends State<Messages> {
                       List<DocumentSnapshot> messages = querySnapshot.documents.toList();
                       DocumentSnapshot item = messages[index];
                       Alignment alignment = Alignment.centerRight;
-                      Color color = Color(0xffd2ffa5);
+                      Color color = Color(0xff525AFF);
                       if (_userId != item["userId"]) {
                         alignment = Alignment.centerLeft;
                         color = Colors.white;

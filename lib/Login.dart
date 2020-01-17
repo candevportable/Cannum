@@ -71,7 +71,7 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(color: Color(0xff075E54)),
+        decoration: BoxDecoration(color: Colors.white),
         padding: EdgeInsets.all(16),
         child: Center(
           child: SingleChildScrollView(
@@ -79,10 +79,10 @@ class _LoginState extends State<Login> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 Padding(
-                  padding: EdgeInsets.only(bottom: 32),
+                  padding: EdgeInsets.fromLTRB(16, 0, 16, 32),
                   child: Image.asset(
-                    "images/logo.png",
-                    width: 200,
+                    "images/logoCandev.png",
+                    width: 180,
                     height: 150,
                   ),
                 ),
@@ -90,7 +90,6 @@ class _LoginState extends State<Login> {
                   padding: EdgeInsets.only(bottom: 8),
                   child: TextField(
                     controller: _controllerEmail,
-                    autofocus: true,
                     keyboardType: TextInputType.emailAddress,
                     style: TextStyle(fontSize: 20),
                     decoration: InputDecoration(
@@ -122,7 +121,7 @@ class _LoginState extends State<Login> {
                       "Entrar",
                       style: TextStyle(color: Colors.white, fontSize: 20),
                     ),
-                    color: Colors.green,
+                    color: Color(0xff020659),
                     padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(32)),
@@ -135,7 +134,7 @@ class _LoginState extends State<Login> {
                   child: GestureDetector(
                     child: Text(
                       "Não tem uma conta? Cadastre-se!",
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: Color(0xff020659)),
                     ),
                     onTap: () {
                       Navigator.pushNamed(context, RouteGenerator.SIGNIN_ROUTE);
