@@ -76,8 +76,8 @@ class _TabConversationsState extends State<TabConversations> {
               if (querySnapshot.documents.length == 0) {
                 return Center(
                   child: Text(
-                    "Você não possui nenhuma conversa no momento :(",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    "Você não possui nenhuma conversa ainda :( ",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 );
               }

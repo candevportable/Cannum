@@ -22,6 +22,8 @@ class Messages extends StatefulWidget {
 
 class _MessagesState extends State<Messages> {
   String _userId;
+  String _userName;
+  String _userImage;
   String _userIdRecipient;
   Firestore _db = Firestore.instance;
   bool _uploading = false;
@@ -60,8 +62,8 @@ class _MessagesState extends State<Messages> {
     conversationRecipient.userId = _userIdRecipient;
     conversationRecipient.recipientId = _userId;
     conversationRecipient.message = msg.message;
-    conversationRecipient.name = widget.contact.name;
-    conversationRecipient.urlImage = widget.contact.urlImage;
+    conversationRecipient.name = _userName;
+    conversationRecipient.urlImage = _userImage;
     conversationRecipient.type = msg.type;
     conversationRecipient.save();
   }
@@ -120,12 +122,21 @@ class _MessagesState extends State<Messages> {
     _saveMessage(_userId, _userIdRecipient, message);
   }
 
+  _loadUserData() async{
+    DocumentSnapshot snapshot = await _db.collection("users")
+        .document(_userId)
+        .get();
+    Map<String, dynamic> data = snapshot.data;
+    _userName = data["name"];
+    _userImage = data["urlImage"];
+  }
+
   _loadInitialData() async {
     FirebaseAuth auth = FirebaseAuth.instance;
     FirebaseUser user = await auth.currentUser();
     _userId = user.uid;
     _userIdRecipient = widget.contact.userId;
-
+    _loadUserData();
     _addMessagesListener();
   }
 
