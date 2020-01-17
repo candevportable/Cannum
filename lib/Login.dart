@@ -1,8 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:manda_msg/Signin.dart';
-
-import 'Home.dart';
+import 'package:manda_msg/RouteGenerator.dart';
 import 'model/User.dart';
 
 class Login extends StatefulWidget {
@@ -46,7 +44,7 @@ class _LoginState extends State<Login> {
     auth
         .signInWithEmailAndPassword(email: user.email, password: user.password)
         .then((firebaseUser) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
+      Navigator.pushReplacementNamed(context, RouteGenerator.HOME_ROUTE);
     }).catchError((error) {
       setState(() {
         _errorMessage =
@@ -59,7 +57,7 @@ class _LoginState extends State<Login> {
     FirebaseAuth auth = FirebaseAuth.instance;
     FirebaseUser user = await auth.currentUser();
     if (user != null) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
+      Navigator.pushReplacementNamed(context, RouteGenerator.HOME_ROUTE);
     }
   }
 
@@ -140,8 +138,7 @@ class _LoginState extends State<Login> {
                       style: TextStyle(color: Colors.white),
                     ),
                     onTap: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => Signin()));
+                      Navigator.pushNamed(context, RouteGenerator.SIGNIN_ROUTE);
                     },
                   ),
                 ),
