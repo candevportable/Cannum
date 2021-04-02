@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:manda_msg/RouteGenerator.dart';
-import 'model/User.dart';
+import 'package:cannum/RouteGenerator.dart';
+import 'model/app_user.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 
 class Login extends StatefulWidget {
@@ -24,7 +24,7 @@ class _LoginState extends State<Login> {
           _errorMessage = "";
         });
 
-        User user = User();
+        AppUser user = AppUser();
         user.email = email;
         user.password = password;
         _logUser(user);
@@ -40,7 +40,7 @@ class _LoginState extends State<Login> {
     }
   }
 
-  _logUser(User user) {
+  _logUser(AppUser user) {
     FirebaseAuth auth = FirebaseAuth.instance;
     auth
         .signInWithEmailAndPassword(email: user.email, password: user.password)
@@ -56,7 +56,7 @@ class _LoginState extends State<Login> {
 
   Future _verifyUserLogged() async {
     FirebaseAuth auth = FirebaseAuth.instance;
-    FirebaseUser user = await auth.currentUser();
+    User user = auth.currentUser;
     if (user != null) {
       Navigator.pushReplacementNamed(context, RouteGenerator.HOME_ROUTE);
     }

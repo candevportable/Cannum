@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:manda_msg/model/User.dart';
+import 'package:cannum/model/app_user.dart';
 
 import '../RouteGenerator.dart';
 
@@ -13,7 +13,7 @@ class TabConversations extends StatefulWidget {
 
 class _TabConversationsState extends State<TabConversations> {
   final _controller = StreamController<QuerySnapshot>.broadcast();
-  Firestore db = Firestore.instance;
+  FirebaseFirestore db = FirebaseFirestore.instance;
   String _userId;
 
   @override
@@ -22,10 +22,10 @@ class _TabConversationsState extends State<TabConversations> {
     _loadInitialData();
   }
 
-  Stream<QuerySnapshot> _addConversationListener() {
+  _addConversationListener() {
     final stream = db
         .collection("conversations")
-        .document(_userId)
+        .doc(_userId)
         .collection("last_message")
         .snapshots();
 
@@ -36,7 +36,7 @@ class _TabConversationsState extends State<TabConversations> {
 
   _loadInitialData() async {
     FirebaseAuth auth = FirebaseAuth.instance;
-    FirebaseUser user = await auth.currentUser();
+    User user = auth.currentUser;
     _userId = user.uid;
     _addConversationListener();
   }
@@ -73,7 +73,7 @@ class _TabConversationsState extends State<TabConversations> {
               return Text("Erro ao carregar conversas!");
             } else {
               QuerySnapshot querySnapshot = snapshot.data;
-              if (querySnapshot.documents.length == 0) {
+              if (querySnapshot.docs.length == 0) {
                 return Center(
                   child: Text(
                     "Você não possui nenhuma conversa ainda :( ",
@@ -82,10 +82,10 @@ class _TabConversationsState extends State<TabConversations> {
                 );
               }
               return ListView.builder(
-                  itemCount: querySnapshot.documents.length,
+                  itemCount: querySnapshot.docs.length,
                   itemBuilder: (_, index) {
                     List<DocumentSnapshot> conversations =
-                        querySnapshot.documents.toList();
+                        querySnapshot.docs.toList();
                     DocumentSnapshot item = conversations[index];
 
                     String urlImage = item["urlImage"];
@@ -94,7 +94,7 @@ class _TabConversationsState extends State<TabConversations> {
                     String name = item["name"];
                     String repicientId = item["recipientId"];
 
-                    User user = User();
+                    AppUser user = AppUser();
                     user.name = name;
                     user.urlImage = urlImage;
                     user.userId = repicientId;
@@ -125,6 +125,7 @@ class _TabConversationsState extends State<TabConversations> {
                   });
             }
         }
+        return null;
       },
     );
   }

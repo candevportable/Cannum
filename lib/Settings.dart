@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:manda_msg/RouteGenerator.dart';
+import 'package:cannum/RouteGenerator.dart';
 
 class Settings extends StatefulWidget {
   @override
@@ -19,52 +19,55 @@ class _SettingsState extends State<Settings> {
   bool _uploading = false;
   bool _loading = false;
 
-  Future _recoverPhoto(String source) async{
+  Future _recoverPhoto(String source) async {
+    final _picker = ImagePicker();
     File selectedPhoto;
 
-    switch(source){
+    switch (source) {
       case "camera":
-        selectedPhoto = await ImagePicker.pickImage(source: ImageSource.camera);
+        final _selectedImg = await _picker.getImage(source: ImageSource.camera);
+        selectedPhoto = File(_selectedImg.path);
         break;
       case "gallery":
-        selectedPhoto = await ImagePicker.pickImage(source: ImageSource.gallery);
+        final _selectedImg =
+            await _picker.getImage(source: ImageSource.gallery);
+        selectedPhoto = File(_selectedImg.path);
         break;
     }
 
     setState(() {
       _photo = selectedPhoto;
-      if(_photo != null){
+      if (_photo != null) {
         _uploading = true;
         _uploadImage();
       }
     });
   }
 
-  Future _uploadImage() async{
+  Future _uploadImage() async {
     FirebaseStorage storage = FirebaseStorage.instance;
-    StorageReference root = storage.ref();
-    StorageReference file = root.child("profile")
-                                .child(_userId + ".jpg");
+    Reference root = storage.ref();
+    Reference file = root.child("profile").child(_userId + ".jpg");
 
-    StorageUploadTask task = file.putFile(_photo);
-    task.events.listen((StorageTaskEvent storageEvent){
-      if(storageEvent.type == StorageTaskEventType.progress){
+    UploadTask task = file.putFile(_photo);
+    task.snapshotEvents.listen((TaskSnapshot snapshot) {
+      if (snapshot.state == TaskState.running) {
         setState(() {
           _uploading = true;
         });
-      }else if(storageEvent.type == StorageTaskEventType.success){
+      } else if (snapshot.state == TaskState.success) {
         setState(() {
           _uploading = false;
         });
       }
     });
-    
-    task.onComplete.then((StorageTaskSnapshot snapshot){
+
+    task.then((TaskSnapshot snapshot) {
       _fetchUrlImage(snapshot);
     });
   }
 
-  Future _fetchUrlImage(StorageTaskSnapshot snapshot) async{
+  Future _fetchUrlImage(TaskSnapshot snapshot) async {
     String url = await snapshot.ref.getDownloadURL();
     _reloadUrlImageFirestore(url);
 
@@ -73,50 +76,40 @@ class _SettingsState extends State<Settings> {
     });
   }
 
-  _reloadUrlImageFirestore(String url){
-    Firestore db = Firestore.instance;
+  _reloadUrlImageFirestore(String url) {
+    FirebaseFirestore db = FirebaseFirestore.instance;
 
-    Map<String, dynamic> updatedData = {
-      "urlImage" : url
-    };
+    Map<String, dynamic> updatedData = {"urlImage": url};
 
-    db.collection("users")
-    .document(_userId)
-    .updateData(updatedData);
+    db.collection("users").doc(_userId).update(updatedData);
   }
 
-  _reloadNameImageFirestore(){
-    Firestore db = Firestore.instance;
+  _reloadNameImageFirestore() {
+    FirebaseFirestore db = FirebaseFirestore.instance;
     String name = _controllerName.text;
 
-    Map<String, dynamic> updatedData = {
-      "name" : name
-    };
+    Map<String, dynamic> updatedData = {"name": name};
 
-    db.collection("users")
-        .document(_userId)
-        .updateData(updatedData);
+    db.collection("users").doc(_userId).update(updatedData);
   }
 
-  _recoverProfileData() async{
+  _recoverProfileData() async {
     _loading = true;
     FirebaseAuth auth = FirebaseAuth.instance;
-    FirebaseUser user = await auth.currentUser();
+    User user = auth.currentUser;
     _userId = user.uid;
 
-    Firestore db = Firestore.instance;
-    DocumentSnapshot snapshot = await db.collection("users")
-     .document(_userId)
-     .get();
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    DocumentSnapshot snapshot = await db.collection("users").doc(_userId).get();
 
-    Map<String, dynamic> data = snapshot.data;
+    Map<String, dynamic> data = snapshot.data();
     _controllerName.text = data["name"];
 
     setState(() {
       _loading = false;
     });
 
-    if(data["urlImage"] != null){
+    if (data["urlImage"] != null) {
       setState(() {
         _imageUrl = data["urlImage"];
       });
@@ -132,7 +125,9 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Configurações"),),
+      appBar: AppBar(
+        title: Text("Configurações"),
+      ),
       body: SingleChildScrollView(
         child: Container(
           padding: EdgeInsets.all(16),
@@ -141,32 +136,28 @@ class _SettingsState extends State<Settings> {
               children: <Widget>[
                 Container(
                   padding: EdgeInsets.all(32),
-                  child: _uploading
-                      ? CircularProgressIndicator()
-                      : Container(),
+                  child: _uploading ? CircularProgressIndicator() : Container(),
                 ),
                 _loading
-                ? CircularProgressIndicator()
-                : CircleAvatar(
-                  radius: 100,
-                  backgroundColor: Colors.grey,
-                  backgroundImage:
-                  _imageUrl != null
-                      ? NetworkImage(_imageUrl)
-                      : null,
-                ),
+                    ? CircularProgressIndicator()
+                    : CircleAvatar(
+                        radius: 100,
+                        backgroundColor: Colors.grey,
+                        backgroundImage:
+                            _imageUrl != null ? NetworkImage(_imageUrl) : null,
+                      ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    FlatButton(
+                    TextButton(
                       child: Text("Câmera"),
-                      onPressed: (){
+                      onPressed: () {
                         _recoverPhoto("camera");
                       },
                     ),
-                    FlatButton(
+                    TextButton(
                       child: Text("Galeria"),
-                      onPressed: (){
+                      onPressed: () {
                         _recoverPhoto("gallery");
                       },
                     )
@@ -200,7 +191,8 @@ class _SettingsState extends State<Settings> {
                         borderRadius: BorderRadius.circular(32)),
                     onPressed: () {
                       _reloadNameImageFirestore();
-                      Navigator.pushNamedAndRemoveUntil(context, RouteGenerator.HOME_ROUTE, (_)=>false);
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, RouteGenerator.HOME_ROUTE, (_) => false);
                     },
                   ),
                 )

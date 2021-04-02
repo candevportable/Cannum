@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:manda_msg/RouteGenerator.dart';
-import 'package:manda_msg/model/User.dart';
+import 'package:cannum/RouteGenerator.dart';
+import 'package:cannum/model/app_user.dart';
 
 class TabContacts extends StatefulWidget {
   @override
@@ -12,19 +12,19 @@ class TabContacts extends StatefulWidget {
 class _TabContactsState extends State<TabContacts> {
   String _userEmail;
 
-  Future<List<User>> _loadContacts() async {
-    Firestore db = Firestore.instance;
+  Future<List<AppUser>> _loadContacts() async {
+    FirebaseFirestore db = FirebaseFirestore.instance;
 
-    QuerySnapshot querySnapshot = await db.collection("users").getDocuments();
+    QuerySnapshot querySnapshot = await db.collection("users").get();
 
-    List<User> usersList = List();
-    for (DocumentSnapshot item in querySnapshot.documents) {
-      var data = item.data;
+    List<AppUser> usersList;
+    for (DocumentSnapshot item in querySnapshot.docs) {
+      var data = item.data();
 
-      if(data["email"] == _userEmail) continue;
+      if (data["email"] == _userEmail) continue;
 
-      User user = User();
-      user.userId = item.documentID;
+      AppUser user = AppUser();
+      user.userId = item.id;
       user.name = data["name"];
       user.email = data["email"];
       user.urlImage = data["urlImage"];
@@ -34,9 +34,9 @@ class _TabContactsState extends State<TabContacts> {
     return usersList;
   }
 
-  _recoverProfileData() async{
+  _recoverProfileData() async {
     FirebaseAuth auth = FirebaseAuth.instance;
-    FirebaseUser user = await auth.currentUser();
+    User user = auth.currentUser;
     _userEmail = user.email;
   }
 
@@ -48,7 +48,7 @@ class _TabContactsState extends State<TabContacts> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<User>>(
+    return FutureBuilder<List<AppUser>>(
       future: _loadContacts(),
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
@@ -71,14 +71,13 @@ class _TabContactsState extends State<TabContacts> {
             return ListView.builder(
                 itemCount: snapshot.data.length,
                 itemBuilder: (_, index) {
-                  List<User> contactsList = snapshot.data;
-                  User user = contactsList[index];
+                  List<AppUser> contactsList = snapshot.data;
+                  AppUser user = contactsList[index];
 
                   return ListTile(
-                      onTap: (){
+                      onTap: () {
                         Navigator.pushNamed(
-                            context,
-                            RouteGenerator.MESSAGES_ROUTE,
+                            context, RouteGenerator.MESSAGES_ROUTE,
                             arguments: user);
                       },
                       contentPadding: EdgeInsets.fromLTRB(16, 8, 16, 8),

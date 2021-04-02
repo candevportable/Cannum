@@ -1,20 +1,16 @@
-class User {
+class AppUser {
   String _name;
   String _userId;
   String _email;
   String _password;
   String _urlImage;
 
-  User();
+  AppUser();
 
-  Map<String, dynamic> toMap(){
-      Map<String, dynamic> map = {
-          "name": this.name,
-          "email": this.email
-      };
-      return map;
+  Map<String, dynamic> toMap() {
+    Map<String, dynamic> map = {"name": this.name, "email": this.email};
+    return map;
   }
-
 
   String get userId => _userId;
 

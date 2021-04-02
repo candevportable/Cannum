@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:manda_msg/RouteGenerator.dart';
-import 'package:manda_msg/model/User.dart';
+import 'package:cannum/RouteGenerator.dart';
+import 'package:cannum/model/app_user.dart';
 
 class Signin extends StatefulWidget {
   @override
@@ -27,7 +27,7 @@ class _SigninState extends State<Signin> {
             _errorMessage = "";
           });
 
-          User user = User();
+          AppUser user = AppUser();
           user.name = name;
           user.email = email;
           user.password = password;
@@ -49,19 +49,18 @@ class _SigninState extends State<Signin> {
     }
   }
 
-  _registerUser(User user) {
+  _registerUser(AppUser user) {
     FirebaseAuth auth = FirebaseAuth.instance;
-    auth.createUserWithEmailAndPassword(
-        email: user.email,
-        password: user.password
-    ).then((firebaseUser) {
-      Firestore db = Firestore.instance;
+    auth
+        .createUserWithEmailAndPassword(
+            email: user.email, password: user.password)
+        .then((firebaseUser) {
+      FirebaseFirestore db = FirebaseFirestore.instance;
 
-      db.collection("users")
-          .document(firebaseUser.user.uid)
-          .setData(user.toMap());
+      db.collection("users").doc(firebaseUser.user.uid).set(user.toMap());
 
-      Navigator.pushNamedAndRemoveUntil(context, RouteGenerator.HOME_ROUTE, (_)=>false);
+      Navigator.pushNamedAndRemoveUntil(
+          context, RouteGenerator.HOME_ROUTE, (_) => false);
     }).catchError((error) {
       setState(() {
         _errorMessage =

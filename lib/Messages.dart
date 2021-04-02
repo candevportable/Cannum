@@ -5,14 +5,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:manda_msg/model/Conversation.dart';
-import 'package:manda_msg/model/User.dart';
-import 'model/Message.dart';
+import 'package:cannum/model/conversation.dart';
+import 'package:cannum/model/app_user.dart';
+import 'model/message.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 
 class Messages extends StatefulWidget {
-  User contact;
+  final AppUser contact;
 
   Messages(this.contact);
 
@@ -25,10 +25,10 @@ class _MessagesState extends State<Messages> {
   String _userName;
   String _userImage;
   String _userIdRecipient;
-  Firestore _db = Firestore.instance;
+  FirebaseFirestore _db = FirebaseFirestore.instance;
   bool _uploading = false;
   TextEditingController _controllerMessage = TextEditingController();
-  final _controller = StreamController<QuerySnapshot>.broadcast();
+  var _controller = StreamController<QuerySnapshot>.broadcast();
   ScrollController _scrollController = ScrollController();
 
   _sendMessage() {
@@ -48,7 +48,7 @@ class _MessagesState extends State<Messages> {
     }
   }
 
-  _saveConversation(Message msg){
+  _saveConversation(Message msg) {
     Conversation conversationSender = Conversation();
     conversationSender.userId = _userId;
     conversationSender.recipientId = _userIdRecipient;
@@ -71,44 +71,44 @@ class _MessagesState extends State<Messages> {
   _saveMessage(String recipientId, String senderId, Message message) async {
     await _db
         .collection("messages")
-        .document(recipientId)
+        .doc(recipientId)
         .collection(senderId)
         .add(message.toMap());
 
     _controllerMessage.clear();
   }
 
-  _sendImage() async{
-    File _selectedImage = await ImagePicker.pickImage(source: ImageSource.camera);
+  _sendImage() async {
+    final _picker = ImagePicker();
+    final _selectedImg = await _picker.getImage(source: ImageSource.camera);
+    final File _selectedImage = File(_selectedImg.path);
     _uploading = true;
     String _imageName = DateTime.now().millisecondsSinceEpoch.toString();
 
     FirebaseStorage storage = FirebaseStorage.instance;
-    StorageReference root = storage.ref();
-    StorageReference file = root.child("messages")
-        .child(_userId)
-        .child(_imageName + ".jpg");
+    Reference root = storage.ref();
+    Reference file =
+        root.child("messages").child(_userId).child(_imageName + ".jpg");
 
-    StorageUploadTask task = file.putFile(_selectedImage);
-    task.events.listen((StorageTaskEvent storageEvent){
-      if(storageEvent.type == StorageTaskEventType.progress){
+    UploadTask task = file.putFile(_selectedImage);
+    task.snapshotEvents.listen((TaskSnapshot taskSnapshot) {
+      if (taskSnapshot.state == TaskState.running) {
         setState(() {
           _uploading = true;
         });
-      }else if(storageEvent.type == StorageTaskEventType.success){
+      } else if (taskSnapshot.state == TaskState.success) {
         setState(() {
           _uploading = false;
         });
       }
     });
 
-    task.onComplete.then((StorageTaskSnapshot snapshot){
+    task.then((TaskSnapshot snapshot) {
       _fetchUrlImage(snapshot);
     });
-
   }
 
-  Future _fetchUrlImage(StorageTaskSnapshot snapshot) async{
+  Future _fetchUrlImage(TaskSnapshot snapshot) async {
     String url = await snapshot.ref.getDownloadURL();
 
     Message message = Message();
@@ -122,18 +122,17 @@ class _MessagesState extends State<Messages> {
     _saveMessage(_userId, _userIdRecipient, message);
   }
 
-  _loadUserData() async{
-    DocumentSnapshot snapshot = await _db.collection("users")
-        .document(_userId)
-        .get();
-    Map<String, dynamic> data = snapshot.data;
+  _loadUserData() async {
+    DocumentSnapshot snapshot =
+        await _db.collection("users").doc(_userId).get();
+    Map<String, dynamic> data = snapshot.data();
     _userName = data["name"];
     _userImage = data["urlImage"];
   }
 
   _loadInitialData() async {
     FirebaseAuth auth = FirebaseAuth.instance;
-    FirebaseUser user = await auth.currentUser();
+    User user = auth.currentUser;
     _userId = user.uid;
     _userIdRecipient = widget.contact.userId;
     _loadUserData();
@@ -143,17 +142,19 @@ class _MessagesState extends State<Messages> {
   Stream<QuerySnapshot> _addMessagesListener() {
     final stream = _db
         .collection("messages")
-        .document(_userId)
+        .doc(_userId)
         .collection(_userIdRecipient)
         .orderBy("time", descending: false)
         .snapshots();
 
     stream.listen((data) {
       _controller.add(data);
-      Timer(Duration(seconds: 1), (){
+      Timer(Duration(seconds: 1), () {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
       });
     });
+
+    return null;
   }
 
   @override
@@ -182,27 +183,30 @@ class _MessagesState extends State<Messages> {
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(32)),
-                  prefixIcon:
-                  _uploading ? CircularProgressIndicator()
-                    :IconButton(icon: Icon(Icons.camera_alt),onPressed: _sendImage,),
+                  prefixIcon: _uploading
+                      ? CircularProgressIndicator()
+                      : IconButton(
+                          icon: Icon(Icons.camera_alt),
+                          onPressed: _sendImage,
+                        ),
                 ),
               ),
             ),
           ),
           Platform.isIOS
-            ? CupertinoButton(
-                child: Text("Enviar"),
-                onPressed: _sendMessage,
-              )
-            : FloatingActionButton(
-                backgroundColor: Color(0xff020659),
-                child: Icon(
-                  Icons.send,
-                  color: Colors.white,
-                ),
-                mini: true,
-                onPressed: _sendMessage,
-              )
+              ? CupertinoButton(
+                  child: Text("Enviar"),
+                  onPressed: _sendMessage,
+                )
+              : FloatingActionButton(
+                  backgroundColor: Color(0xff020659),
+                  child: Icon(
+                    Icons.send,
+                    color: Colors.white,
+                  ),
+                  mini: true,
+                  onPressed: _sendMessage,
+                )
         ],
       ),
     );
@@ -236,9 +240,10 @@ class _MessagesState extends State<Messages> {
               return Expanded(
                 child: ListView.builder(
                     controller: _scrollController,
-                    itemCount: querySnapshot.documents.length,
+                    itemCount: querySnapshot.docs.length,
                     itemBuilder: (context, index) {
-                      List<DocumentSnapshot> messages = querySnapshot.documents.toList();
+                      List<DocumentSnapshot> messages =
+                          querySnapshot.docs.toList();
                       DocumentSnapshot item = messages[index];
                       Alignment alignment = Alignment.centerRight;
                       Color color = Color(0xff525AFF);
@@ -254,13 +259,16 @@ class _MessagesState extends State<Messages> {
                           child: Container(
                             padding: EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                                color: color,
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(8))),
-                            child:
-                            item["type"] == "text"
-                              ? Text(item["message"], style: TextStyle(fontSize: 18),)
-                              : Image.network(item["urlImage"]),
+                              color: color,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(8)),
+                            ),
+                            child: item["type"] == "text"
+                                ? Text(
+                                    item["message"],
+                                    style: TextStyle(fontSize: 18),
+                                  )
+                                : Image.network(item["urlImage"]),
                           ),
                         ),
                       );
@@ -294,8 +302,9 @@ class _MessagesState extends State<Messages> {
       body: Container(
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
-            image: DecorationImage(
-                image: AssetImage("images/bg.png"), fit: BoxFit.cover)),
+          image: DecorationImage(
+              image: AssetImage("images/bg.png"), fit: BoxFit.cover),
+        ),
         child: SafeArea(
           child: Container(
             padding: EdgeInsets.all(8),
