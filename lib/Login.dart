@@ -83,21 +83,23 @@ class _LoginState extends State<Login> {
           width: 250.0,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
-            child: TypewriterAnimatedTextKit(
-              onTap: () {
-                print("Tap Event");
-              },
-              text: ["Cannum"],
-              speed: Duration(milliseconds: 200),
+            child: AnimatedTextKit(
               pause: Duration(seconds: 2),
-              curve: Curves.easeInSine,
-              textStyle: TextStyle(
-                  fontSize: 57.0,
-                  fontFamily: "Tox Typewriter",
-                  letterSpacing: 2,
-                  color: Color(0xFF484536)),
-              textAlign: TextAlign.start,
               repeatForever: true,
+              animatedTexts: [
+                TypewriterAnimatedText(
+                  "Cannum",
+                  speed: Duration(milliseconds: 200),
+                  curve: Curves.easeInSine,
+                  textStyle: TextStyle(
+                    fontSize: 57.0,
+                    fontFamily: "Tox Typewriter",
+                    letterSpacing: 2,
+                    color: Color(0xFF484536),
+                  ),
+                  textAlign: TextAlign.start,
+                ),
+              ],
             ),
           ),
         )
