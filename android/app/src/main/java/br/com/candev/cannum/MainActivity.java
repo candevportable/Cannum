@@ -1,4 +1,4 @@
-package br.com.candev.manda_msg;
+package br.com.candev.cannum;
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity;

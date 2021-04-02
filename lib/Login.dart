@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:manda_msg/RouteGenerator.dart';
 import 'model/User.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -63,7 +64,7 @@ class _LoginState extends State<Login> {
 
   @override
   void initState() {
-    _verifyUserLogged();
+    //_verifyUserLogged();
     super.initState();
   }
 
@@ -71,10 +72,37 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(color: Colors.white),
-        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+            color: Color(0xFFDFC7A3),
+            image: DecorationImage(
+                fit: BoxFit.none,
+                image: AssetImage('assets/images/background_folha.jpg'))),
+        padding: EdgeInsets.fromLTRB(16, 16, 0, 16),
         child: Center(
-          child: SingleChildScrollView(
+            child: SizedBox(
+          width: 250.0,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
+            child: TypewriterAnimatedTextKit(
+              onTap: () {
+                print("Tap Event");
+              },
+              text: ["Cannum"],
+              speed: Duration(milliseconds: 200),
+              pause: Duration(seconds: 2),
+              curve: Curves.easeInSine,
+              textStyle: TextStyle(
+                  fontSize: 57.0,
+                  fontFamily: "Tox Typewriter",
+                  letterSpacing: 2,
+                  color: Color(0xFF484536)),
+              textAlign: TextAlign.start,
+              repeatForever: true,
+            ),
+          ),
+        )
+
+            /*SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
@@ -152,8 +180,8 @@ class _LoginState extends State<Login> {
                 )
               ],
             ),
-          ),
-        ),
+          ),*/
+            ),
       ),
     );
   }
