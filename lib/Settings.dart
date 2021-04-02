@@ -180,15 +180,18 @@ class _SettingsState extends State<Settings> {
                 ),
                 Padding(
                   padding: EdgeInsets.only(top: 16, bottom: 10),
-                  child: RaisedButton(
+                  child: ElevatedButton(
                     child: Text(
                       "Salvar",
                       style: TextStyle(color: Colors.white, fontSize: 20),
                     ),
-                    color: Color(0xff525AFF),
-                    padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32)),
+                    style: ElevatedButton.styleFrom(
+                      primary: Color(0xff525AFF),
+                      padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(32),
+                      ),
+                    ),
                     onPressed: () {
                       _reloadNameImageFirestore();
                       Navigator.pushNamedAndRemoveUntil(
